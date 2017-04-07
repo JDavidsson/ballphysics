@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private static final float ALPHA = 0.5f;
     private static final double friction = 0.001;
-
     public Handler handler;
 
     private double xPixelsPerMeter;
@@ -91,8 +90,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     b = (ballParkHeight / yPixelsPerMeter) / 2;
 
                     // shrink for margins
-                    a *=  0.9;
-                    b *=  0.9;
+                    a *=  0.95;
+                    b *=  0.95;
 
 
                 } while( ballParkWidth == 0 || ballParkHeight == 0 || a == 0 || b == 0);
@@ -117,8 +116,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     X = prevX + vx * interval;
                     Y = prevY + vy * interval;
 
-                    //if ((X < radius/2 && X > -radius/2)) {
-                    // if ((Math.abs(X) < Math.sqrt(Math.pow(radius,2)-Math.pow(Y,2)))) {
                     if (Math.abs(X) < Math.sqrt( Math.pow(a,2) * (1-Math.pow((Y/b),2)) ) ) {
                         prevX = X;
                         prevVx = vx;
@@ -128,8 +125,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         X = prevX;
                     }
 
-                    //if((Y < radius/2 && Y > -radius/2)) {
-                    //if ((Math.abs(Y) < Math.sqrt(Math.pow(radius,2)-Math.pow(X,2)))) {
                     if (Math.abs(Y) < Math.sqrt( Math.pow(b,2) * (1-Math.pow((X/a),2)) ) ){
                         prevY = Y;
                         prevVy = vy;

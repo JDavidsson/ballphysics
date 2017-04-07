@@ -40,16 +40,27 @@
         android:id="@+id/ballpark"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        android:layout_gravity="center"
-        android:background="@android:drawable/alert_light_frame">
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@drawable/circle"
+            android:elevation="0dp"
+            />
 
         <TextView
             android:id="@+id/ball"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="O" />
+            android:alpha="11"
+            android:elevation="10dp"
+            android:text="O"
+            android:textStyle="bold" />
     </FrameLayout>
+
 
 
 </LinearLayout>
