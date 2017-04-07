@@ -11,9 +11,6 @@ import android.widget.TextView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-
-
-
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager sensorManager;
@@ -66,18 +63,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         Runnable ball = new Runnable() {
 
-            /**
-             *  implemenation according to following:
-             *
-             *  Vx(t) = Vx(t-1) + g * sin(alphax) * t
-             *  Vy(t) = Vy(t-1) + g * sin(alphay) * t
-             *
-             *  alphax(cx)
-             *
-             *
-             *
-             */
-
             private double vx;
             private double vy;
             private double prevVx;
@@ -128,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     X = prevX + vx * interval;
                     Y = prevY + vy * interval;
 
-                    if (Math.abs(X) < Math.sqrt( Math.pow(a,2) * (1-Math.pow((Y/b),2)) ) ) {
+                    if (Math.abs(X) < Math.sqrt( Math.pow(a,2) * (1-Math.pow((Y/b),2)))) {
                         prevX = X;
                         prevVx = vx;
                     } else {
@@ -137,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         X = prevX;
                     }
 
-                    if (Math.abs(Y) < Math.sqrt( Math.pow(b,2) * (1-Math.pow((X/a),2)) ) ){
+                    if (Math.abs(Y) < Math.sqrt( Math.pow(b,2) * (1-Math.pow((X/a),2)))){
                         prevY = Y;
                         prevVy = vy;
                     } else {
