@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+
+    <TextView
+        android:id="@+id/ppm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Values here" />
+    <TextView
+        android:id="@+id/ppi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Values here" />
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:elevation="0dp"
+        android:text="Position of ball" />
+
+    <TextView
+        android:id="@+id/xys"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Values here" />
+
+
+    <FrameLayout
+        android:id="@+id/ballpark"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center"
+        android:background="@android:drawable/alert_light_frame">
+
+        <TextView
+            android:id="@+id/ball"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="O" />
+    </FrameLayout>
+
+
+</LinearLayout>
