@@ -11,13 +11,15 @@ import android.widget.TextView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+
+
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
 
     private static final float ALPHA = 0.5f;
-    private static final double friction = 0.001;
     public Handler handler;
 
     private double xPixelsPerMeter;
@@ -40,8 +42,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // 1 inch = 0.0254 m
         xPixelsPerMeter = metrics.xdpi / 0.0254;
         yPixelsPerMeter = metrics.ydpi / 0.0254;
-        ((TextView) findViewById(R.id.ppi)).setText("ppi x: " + String.valueOf(metrics.xdpi)+ "ppi y: " + String.valueOf(metrics.ydpi));
-        ((TextView) findViewById(R.id.ppm)).setText("ppm x: " + String.valueOf(xPixelsPerMeter)+ "ppm x: " + String.valueOf(yPixelsPerMeter));
+        // show
+        ((TextView) findViewById(R.id.ppi)).setText("ppi x: " + String.valueOf(metrics.xdpi) + "\n" + "ppi y: " + String.valueOf(metrics.ydpi));
+        ((TextView) findViewById(R.id.ppm)).setText("ppm x: " + String.valueOf(xPixelsPerMeter) + "\n" + "ppm x: " + String.valueOf(yPixelsPerMeter));
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -63,13 +66,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         Runnable ball = new Runnable() {
 
+            /**
+             *  implemenation according to following:
+             *
+             *  Vx(t) = Vx(t-1) + g * sin(alphax) * t
+             *  Vy(t) = Vy(t-1) + g * sin(alphay) * t
+             *
+             *  alphax(cx)
+             *
+             *
+             *
+             */
+
             private double vx;
             private double vy;
             private double prevVx;
             private double prevVy;
             private double alphaY;
             private double alphaX;
-            private double interval;
 
             private double X = 0;
             private double Y = 0;
@@ -82,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             private final static double g = 9.807;
             private final static double c = Math.PI / (2*g);
 
+            private double interval = 0.001; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
+
             @Override
             public void run() {
 
@@ -93,14 +109,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     a *=  0.95;
                     b *=  0.95;
 
-
-                } while( ballParkWidth == 0 || ballParkHeight == 0 || a == 0 || b == 0);
-
-
+                } while(ballParkWidth == 0 || ballParkHeight == 0 || a == 0 || b == 0);
 
                 while(true) {
 
-                    interval = 0.001; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
@@ -139,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             TextView ballMan = (TextView) findViewById(R.id.ball);
                             double bX = startXBall + X * xPixelsPerMeter;
                             double  bY = startYBall + Y * yPixelsPerMeter;
-                            ((TextView) findViewById(R.id.xys)).setText("X-pos " + String.valueOf(X) + "\n" + "Y-pos: " +String.valueOf(Y) + "\n" + "X pixels = " + String.valueOf(bX) + "\n" + "Y pixels = "+ String.valueOf(bY) + "\n" + "startPX x: " + String.valueOf(startXBall) + "\n" + "startPX y: " +  String.valueOf(startYBall) + "\n" + "Layout pixelwidth: " +  String.valueOf(ballParkWidth) + "\n"  + "Layout pixelheight: " +  String.valueOf(ballParkHeight) + "\n" + "a: " +  String.valueOf(a) + "\n" + "b: " +  String.valueOf(b));
+                            ((TextView) findViewById(R.id.info)).setText("x (meter): " + String.valueOf(X) + "\n" + "y (meter): " +String.valueOf(Y) + "\n" + "x (pixels):  = " + String.valueOf(bX) + "\n" + "y (meter):  = "+ String.valueOf(bY) + "\n" + "start pixel x: " + String.valueOf(startXBall) + "\n" + "start pixel y: " +  String.valueOf(startYBall) + "\n" + "Layout pixel width: " +  String.valueOf(ballParkWidth) + "\n"  + "Layout pixel height: " +  String.valueOf(ballParkHeight) + "\n" + "a: " +  String.valueOf(a) + "\n" + "b: " +  String.valueOf(b));
                             ballMan.setX(Double.valueOf(bX).floatValue());
                             ballMan.setY(Double.valueOf(bY).floatValue());
                         }
@@ -161,18 +173,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
-
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         acc = lowPass(event.values, acc);
-
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 
     protected float[] lowPass(float[] input, float[] output) {
