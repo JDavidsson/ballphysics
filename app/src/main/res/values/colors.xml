@@ -3,4 +3,11 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="circleBase">#99ffff</color>
+    <color name="circleStroke">#00ddaa</color>
+    <color name="ballColor">#11ddaa</color>
+
+    <color name="lives">#00ddaa</color>
+    <color name="livesLeft">#11ddaa</color>
 </resources>

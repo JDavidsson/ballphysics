@@ -14,16 +14,17 @@
         android:id="@+id/ppm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:text="Values here" />
     <TextView
         android:id="@+id/ppi"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Values here" />
-
-
     <TextView
         android:id="@+id/info"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Values here" />
@@ -37,6 +38,7 @@
         android:layout_gravity="center">
 
         <TextView
+            android:id="@+id/circle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
@@ -45,16 +47,37 @@
             />
 
         <TextView
-            android:id="@+id/ball"
+            android:id="@+id/ball1"
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:layout_gravity="center"
             android:alpha="1"
             android:background="@drawable/ball"
-            android:elevation="5dp"
+            android:elevation="8dp"
             android:textStyle="bold" />
+
+
     </FrameLayout>
 
+    <TextView
+        android:layout_marginTop="30dp"
+        android:textAlignment="center"
+        android:id="@+id/lives"
+        android:textSize="70dp"
+        android:textColor="@color/lives"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="4310" />
+
+
+    <TextView
+        android:textAlignment="center"
+        android:textColor="@color/livesLeft"
+        android:id="@+id/livesLeft"
+        android:textSize="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="lives left" />
 
 
 </LinearLayout>
