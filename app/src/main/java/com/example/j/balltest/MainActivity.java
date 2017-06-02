@@ -1,4 +1,6 @@
 package com.example.j.balltest;
+
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.Sensor;
@@ -9,10 +11,12 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.animation.AlphaAnimation;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
 import android.view.ViewTreeObserver;
-
+import android.animation.ValueAnimator;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager sensorManager;
@@ -28,8 +32,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double ballParkWidth;
     private double ballParkHeight;
     private int collideCount;
-    private int totalLives;
-
+    private static final int totalLives = 4;
+    private Runnable ballThread;
     private float[] acc = new float[3];
 
     //exp
@@ -37,14 +41,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView ball;
     private TextView lives;
     private TextView livesLeft;
+    private TextView restartButton;
     private boolean gameOn;
+    private Thread T;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DisplayMetrics metrics = new DisplayMetrics();
+        final DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
         // 1 inch = 0.0254 m
@@ -64,26 +70,41 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        startXBall = initialBall.getX();
-                        startYBall = initialBall.getY();
+                        //exp
+                        LinearLayout view = (LinearLayout) findViewById(R.id.ballpark);
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) view.getLayoutParams();
+                        params.width = (int) (metrics.widthPixels * 0.7);
+                        params.height = (int) (metrics.widthPixels * 0.7);
+                        view.setLayoutParams(params);
+
+                        startXBall = view.getWidth() / 2;
+                        startYBall = view.getHeight() / 2;
                         ballParkWidth = findViewById(R.id.ballpark).getWidth();
                         ballParkHeight = findViewById(R.id.ballpark).getHeight();
                         initialBall.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+
+                        GradientDrawable shape1 = (GradientDrawable) circle.getBackground();
+                        int color = getResources().getColor(R.color.circleBase);
+                        shape1.setColor(color);
                     }
                 });
 
         //exp
         collideCount = 0;
-        totalLives = 10;
         gameOn = true;
 
         circle = (TextView) findViewById(R.id.circle);
+        circle.setVisibility(View.VISIBLE);
         ball = (TextView) findViewById(R.id.ball1);
+        ball.setVisibility(View.VISIBLE);
         lives = (TextView) findViewById(R.id.lives);
         livesLeft = (TextView) findViewById(R.id.livesLeft);
+        restartButton = (TextView) findViewById(R.id.restartButton);
+        restartButton.setVisibility(View.GONE);
         lives.setText(String.valueOf(totalLives - collideCount));
 
-        Runnable ball = new Runnable() {
+
+        ballThread = new Runnable() {
 
             private double vx;
             private double vy;
@@ -101,13 +122,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             private double b;
 
             private final static double g = 9.807;
-            private final static double c = Math.PI / (2*g);
+            private final static double c = Math.PI / (2 * g);
             private final static double bounce = 0.4; // bounce factor
 
             private double interval = 0.0008; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
 
             //exp
             private boolean collision = false;
+            private boolean flag = true;
 
             @Override
             public void run() {
@@ -117,20 +139,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     b = (ballParkHeight / yPixelsPerMeter) / 2;
 
                     // shrink for margins
-                    a *=  0.95;
-                    b *=  0.95;
+                    a *= 0.95;
+                    b *= 0.95;
 
-                } while(ballParkWidth == 0 || ballParkHeight == 0 || a == 0 || b == 0);
+                } while (ballParkWidth == 0 || ballParkHeight == 0 || a == 0 || b == 0);
 
-                while(gameOn) {
+                while (gameOn) {
+
+
 
                     try {
-                        Thread.sleep(5);
+                        Thread.sleep(3);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                    alphaX = c * - acc[0];
+                    alphaX = c * -acc[0];
                     alphaY = c * acc[1];
 
                     vx = prevVx + g * Math.sin(alphaX) * interval;
@@ -139,39 +163,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     X = prevX + vx * interval;
                     Y = prevY + vy * interval;
 
-                    if (Math.abs(X) < Math.sqrt( Math.pow(a,2) * (1-Math.pow((Y/b),2)))) {
+                    if (Math.abs(X) < Math.sqrt(Math.pow(a, 2) * (1 - Math.pow((Y / b), 2)))) {
                         prevX = X;
                         prevVx = vx;
+                    } else if (Math.abs(Y) < Math.sqrt(Math.pow(b, 2) * (1 - Math.pow((X / a), 2)))) {
+                        prevY = Y;
+                        prevVy = vy;
+
                     } else {
                         vx = 0;
                         prevVx = -prevVx * bounce; // for no bounce set to 0
                         X = prevX;
-
-                        //exp
-                        collision = true;
-                        vx = 0;
-                        prevVx = 0;
-                        prevX = 0;
-                        X = 0;
-                        vy = 0;
-                        prevVy = 0;
-                        prevY = 0;
-                        Y = 0;
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    if (Math.abs(Y) < Math.sqrt( Math.pow(b,2) * (1-Math.pow((X/a),2)))){
-                        prevY = Y;
-                        prevVy = vy;
-                    } else {
                         vy = 0;
                         prevVy = -prevVy * bounce;  // for no bounce set to 0
                         Y = prevY;
-
                         //exp
                         collision = true;
                         vx = 0;
@@ -189,12 +194,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         }
                     }
 
-                    handler.post(new Runnable(){
+                    handler.post(new Runnable() {
                         public void run() {
                             TextView ball1 = (TextView) findViewById(R.id.ball1);
                             double b1X = startXBall + X * xPixelsPerMeter;
-                            double  b1Y = startYBall + Y * yPixelsPerMeter;
-                            ((TextView) findViewById(R.id.info)).setText("x (meter): " + String.valueOf(X) + "\n" + "y (meter): " +String.valueOf(Y) + "\n" + "x (pixels):  = " + String.valueOf(b1X) + "\n" + "y (meter):  = "+ String.valueOf(b1Y) + "\n" + "start pixel x: " + String.valueOf(startXBall) + "\n" + "start pixel y: " +  String.valueOf(startYBall) + "\n" + "Layout pixel width: " +  String.valueOf(ballParkWidth) + "\n"  + "Layout pixel height: " +  String.valueOf(ballParkHeight) + "\n" + "a: " +  String.valueOf(a) + "\n" + "b: " +  String.valueOf(b));
+                            double b1Y = startYBall + Y * yPixelsPerMeter;
+                            ((TextView) findViewById(R.id.info)).setText("x (meter): " + String.valueOf(X) + "\n" + "y (meter): " + String.valueOf(Y) + "\n" + "x (pixels):  = " + String.valueOf(b1X) + "\n" + "y (meter):  = " + String.valueOf(b1Y) + "\n" + "start pixel x: " + String.valueOf(startXBall) + "\n" + "start pixel y: " + String.valueOf(startYBall) + "\n" + "Layout pixel width: " + String.valueOf(ballParkWidth) + "\n" + "Layout pixel height: " + String.valueOf(ballParkHeight) + "\n" + "a: " + String.valueOf(a) + "\n" + "b: " + String.valueOf(b));
                             ball1.setX(Double.valueOf(b1X).floatValue());
                             ball1.setY(Double.valueOf(b1Y).floatValue());
 
@@ -202,44 +207,89 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             if (collision) {
                                 collideCount++;
                                 collide();
-                                collision= false;
+                                collision = false;
+                                if (collideCount == totalLives) {
+                                    gameOn = false;
+                                }
                             }
-
-
                         }
                     });
                 }
+
+                //game over
+
+                handler.post(new Runnable() {
+                    public void run() {
+                        circle.setVisibility(View.GONE);
+                        ball.setVisibility(View.GONE);
+                        restartButton.setVisibility(View.VISIBLE);
+                        LinearLayout view = (LinearLayout) findViewById(R.id.ballpark);
+
+                    }
+                });
+
+                handler.post(new Runnable() {
+                    public void run() {
+                        ValueAnimator animation = ValueAnimator.ofFloat(0f,1f);
+                        animation.setRepeatCount(20);
+                        animation.setDuration(300);
+                        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                float val = (float) valueAnimator.getAnimatedValue();
+                                livesLeft.setAlpha(val);
+                                livesLeft.setText("GAME OVER");
+                                TextView ball1 = (TextView) findViewById(R.id.ball1);
+
+                            }
+                        });
+
+                        animation.start();
+                    }
+                });
+
             }
+
+
         };
 
-        new Thread(ball).start();
+        T = new Thread(ballThread);
+        T.start();
     }
 
-    public void collide(){
+    public void restart(View view) {
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
+    }
+    private void collide() {
 
 
         GradientDrawable shape1 = (GradientDrawable) circle.getBackground();
         int color = getResources().getColor(R.color.circleBase);
         color = color << collideCount;
-        shape1.setColor(color | 0xFF000000); // the | 0xFF000000 is to ensure alpha value always being 1
+        shape1.setColor(color | 0xFF0000FF); // the | 0xFF000000 is to ensure alpha value always being 1
 
         GradientDrawable shape2 = (GradientDrawable) circle.getBackground();
         int strokeColor = getResources().getColor(R.color.circleStroke);
         strokeColor = strokeColor << collideCount;
-        shape2.setStroke(10,strokeColor | 0xFF000000);
+        shape2.setStroke(10, strokeColor | 0xFF000088);
 
         GradientDrawable shape3 = (GradientDrawable) ball.getBackground();
         int ballColor = getResources().getColor(R.color.ballColor);
         ballColor = ballColor << collideCount;
-        shape3.setColor(ballColor | 0xFF000000);
+        shape3.setColor(ballColor | 0xFF000088);
 
         lives.setText(String.valueOf(totalLives - collideCount));
-        GradientDrawable shape4 = (GradientDrawable) lives.getBackground();
         int livesColor = getResources().getColor(R.color.lives);
         livesColor = livesColor << collideCount;
-        lives.setTextColor(livesColor | 0xFF000000);
-        livesLeft.setTextColor(livesColor | 0xFF000000);
+        lives.setTextColor(livesColor | 0xFF000088);
+        livesLeft.setTextColor(livesColor | 0xFF000088);
 
+        GradientDrawable shape4 = (GradientDrawable) restartButton.getBackground();
+        shape4.setColor(color | 0xFF0000FF);
+
+        restartButton.setTextColor(livesColor | 0xFF000088);
 
     }
 
@@ -265,8 +315,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     protected float[] lowPass(float[] input, float[] output) {
-        if (output == null) {return input;}
-        for (int i = 0; i<input.length; i++) {
+        if (output == null) {
+            return input;
+        }
+        for (int i = 0; i < input.length; i++) {
             output[i] = output[i] + ALPHA * (input[i] - output[i]);
         }
         return output;
