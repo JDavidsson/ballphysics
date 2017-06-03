@@ -1,7 +1,6 @@
 package com.example.j.balltest;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -11,7 +10,9 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.view.animation.AlphaAnimation;
+import android.util.TypedValue;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
@@ -21,10 +22,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
-
     private static final float ALPHA = 0.5f;
-    public Handler handler;
-
+    private Handler handler;
     private double xPixelsPerMeter;
     private double yPixelsPerMeter;
     private double startXBall;
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double ballParkWidth;
     private double ballParkHeight;
     private int collideCount;
-    private static final int totalLives = 4;
+    private static final int totalLives = 10;
     private Runnable ballThread;
     private float[] acc = new float[3];
 
@@ -40,10 +39,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView circle;
     private TextView ball;
     private TextView lives;
+    private TextView points;
+    private TextView pointsText;
     private TextView livesLeft;
     private TextView restartButton;
     private boolean gameOn;
     private Thread T;
+    private int p;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //exp
         collideCount = 0;
         gameOn = true;
+        p = 0;
 
         circle = (TextView) findViewById(R.id.circle);
         circle.setVisibility(View.VISIBLE);
@@ -99,10 +102,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ball.setVisibility(View.VISIBLE);
         lives = (TextView) findViewById(R.id.lives);
         livesLeft = (TextView) findViewById(R.id.livesLeft);
+        points = (TextView) findViewById(R.id.points);
+        pointsText = (TextView) findViewById(R.id.pointText);
         restartButton = (TextView) findViewById(R.id.restartButton);
         restartButton.setVisibility(View.GONE);
         lives.setText(String.valueOf(totalLives - collideCount));
-
 
         ballThread = new Runnable() {
 
@@ -121,11 +125,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             private double a;
             private double b;
 
-            private final static double g = 9.807;
+            private final static double g = 9.807; // 9.807
             private final static double c = Math.PI / (2 * g);
             private final static double bounce = 0.4; // bounce factor
 
-            private double interval = 0.0008; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
+            private double interval = 0.002; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
 
             //exp
             private boolean collision = false;
@@ -146,10 +150,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 while (gameOn) {
 
-
-
                     try {
-                        Thread.sleep(3);
+                        Thread.sleep(1);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -166,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     if (Math.abs(X) < Math.sqrt(Math.pow(a, 2) * (1 - Math.pow((Y / b), 2)))) {
                         prevX = X;
                         prevVx = vx;
-                    } else if (Math.abs(Y) < Math.sqrt(Math.pow(b, 2) * (1 - Math.pow((X / a), 2)))) {
+                    } if (Math.abs(Y) < Math.sqrt(Math.pow(b, 2) * (1 - Math.pow((X / a), 2)))) {
                         prevY = Y;
                         prevVy = vy;
 
@@ -199,11 +201,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             TextView ball1 = (TextView) findViewById(R.id.ball1);
                             double b1X = startXBall + X * xPixelsPerMeter;
                             double b1Y = startYBall + Y * yPixelsPerMeter;
-                            ((TextView) findViewById(R.id.info)).setText("x (meter): " + String.valueOf(X) + "\n" + "y (meter): " + String.valueOf(Y) + "\n" + "x (pixels):  = " + String.valueOf(b1X) + "\n" + "y (meter):  = " + String.valueOf(b1Y) + "\n" + "start pixel x: " + String.valueOf(startXBall) + "\n" + "start pixel y: " + String.valueOf(startYBall) + "\n" + "Layout pixel width: " + String.valueOf(ballParkWidth) + "\n" + "Layout pixel height: " + String.valueOf(ballParkHeight) + "\n" + "a: " + String.valueOf(a) + "\n" + "b: " + String.valueOf(b));
                             ball1.setX(Double.valueOf(b1X).floatValue());
                             ball1.setY(Double.valueOf(b1Y).floatValue());
 
                             //experiments
+                            p++;
+                            points.setText(String.valueOf(p));
                             if (collision) {
                                 collideCount++;
                                 collide();
@@ -223,24 +226,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         circle.setVisibility(View.GONE);
                         ball.setVisibility(View.GONE);
                         restartButton.setVisibility(View.VISIBLE);
-                        LinearLayout view = (LinearLayout) findViewById(R.id.ballpark);
-
-                    }
-                });
-
-                handler.post(new Runnable() {
-                    public void run() {
-                        ValueAnimator animation = ValueAnimator.ofFloat(0f,1f);
-                        animation.setRepeatCount(20);
+                        livesLeft.setVisibility(View.INVISIBLE);
+                        ValueAnimator animation = ValueAnimator.ofFloat(0.5f,1f);
+                        animation.setRepeatCount(3);
+                        animation.setStartDelay(4000);
                         animation.setDuration(300);
                         animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                             @Override
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 float val = (float) valueAnimator.getAnimatedValue();
-                                livesLeft.setAlpha(val);
-                                livesLeft.setText("GAME OVER");
-                                TextView ball1 = (TextView) findViewById(R.id.ball1);
+                                restartButton.setAlpha(val);
 
+                            }});
+
+                        animation.start();
+                        }
+                    });
+
+                handler.post(new Runnable() {
+                    public void run() {
+                        ValueAnimator animation = ValueAnimator.ofFloat(0f,1f);
+                        animation.setRepeatCount(5);
+                        animation.setDuration(300);
+                        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                float val = (float) valueAnimator.getAnimatedValue();
+                                lives.setAlpha(val);
+                                lives.setText("GAME OVER");
                             }
                         });
 
@@ -248,9 +261,51 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 });
 
+                handler.post(new Runnable() {
+                    public void run() {
+                        Animation anim = new ScaleAnimation(
+                                1f, 0f, // Start and end values for the X axis scaling
+                                1f, 0f, // Start and end values for the Y axis scaling
+                                Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
+                                Animation.RELATIVE_TO_SELF, 0.5f); // Pivot point of Y scaling
+                        anim.setFillAfter(true); // Needed to keep the result of the animation
+                        anim.setDuration(1000);
+                        anim.setStartOffset(1000);
+                        lives.startAnimation(anim);
+                    }
+                    }
+                );
+
+                handler.post(new Runnable() {
+                                 public void run() {
+                                     final float size = pointsText.getTextSize();
+
+                                     ValueAnimator animation = ValueAnimator.ofFloat(1f,1.4f);
+                                     animation.setDuration(1000);
+                                     animation.setStartDelay(2000);
+                                     final float size2 = lives.getTextSize();
+                                     animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                         @Override
+                                         public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                             float val = (float) valueAnimator.getAnimatedValue();
+                                             float newSize = size * val;
+                                             float newSize2 = size2 * (2f-val);
+                                             pointsText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize);
+                                             points.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize);
+                                             lives.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize2);
+
+                                         }
+                                     });
+                                     animation.start();
+                                 }
+                             }
+                );
+
+
+
+                acc[0] = acc[1] = acc[2] = 0;
+
             }
-
-
         };
 
         T = new Thread(ballThread);
@@ -263,7 +318,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         startActivity(intent);
     }
     private void collide() {
-
 
         GradientDrawable shape1 = (GradientDrawable) circle.getBackground();
         int color = getResources().getColor(R.color.circleBase);
@@ -290,6 +344,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         shape4.setColor(color | 0xFF0000FF);
 
         restartButton.setTextColor(livesColor | 0xFF000088);
+        points.setTextColor(livesColor | 0xFF000088);
+        pointsText.setTextColor(livesColor | 0xFF000088);
 
     }
 

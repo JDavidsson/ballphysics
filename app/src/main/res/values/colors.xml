@@ -9,5 +9,6 @@
     <color name="ballColor">#11ddaa</color>
 
     <color name="lives">#00ddaa</color>
+    <color name="points">#00ddaa</color>
     <color name="livesLeft">#11ddaa</color>
 </resources>

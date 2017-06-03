@@ -32,6 +32,60 @@
 
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+    <TextView
+        android:textColor="@color/livesLeft"
+        android:id="@+id/livesLeft"
+        android:textSize="25dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lives left:" />
+
+    <TextView
+        android:layout_marginTop="0dp"
+        android:id="@+id/lives"
+        android:textSize="50dp"
+        android:textStyle="bold"
+        android:textColor="@color/lives"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GAME OVER" />
+
+        </LinearLayout>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <TextView
+        android:textColor="@color/points"
+        android:id="@+id/pointText"
+        android:textSize="25dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="points : " />
+    <TextView
+
+        android:textColor="@color/points"
+        android:id="@+id/points"
+        android:textSize="25dp"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="23123" />
+
+
+</LinearLayout>
+
+
+
+    <LinearLayout
         android:orientation="horizontal"
         android:layout_marginTop="10dp"
         android:id="@+id/ballpark"
@@ -76,25 +130,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:layout_marginTop="30dp"
-        android:textAlignment="center"
-        android:id="@+id/lives"
-        android:textSize="70dp"
-        android:textColor="@color/lives"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="4310" />
-
-
-    <TextView
-        android:textAlignment="center"
-        android:textColor="@color/livesLeft"
-        android:id="@+id/livesLeft"
-        android:textSize="40dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="lives left" />
 
 
 
