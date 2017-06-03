@@ -40,10 +40,10 @@
     <TextView
         android:textColor="@color/livesLeft"
         android:id="@+id/livesLeft"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="lives left:" />
+        android:text="Lives left:" />
 
     <TextView
         android:layout_marginTop="0dp"
@@ -66,15 +66,15 @@
     <TextView
         android:textColor="@color/points"
         android:id="@+id/pointText"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="points : " />
+        android:text="Points : " />
     <TextView
 
         android:textColor="@color/points"
         android:id="@+id/points"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:textStyle="bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -111,11 +111,12 @@
             android:layout_gravity="center"
             android:text="Restart"
             android:textStyle="bold"
+            android:textAllCaps="false"
             android:onClick="restart"
             android:visibility="gone"
             android:background="@drawable/circle"
             android:textColor="@color/livesLeft"
-            android:textSize="40sp" />
+            android:textSize="35sp" />
 
         <TextView
             android:id="@+id/ball1"
@@ -130,7 +131,10 @@
 
     </LinearLayout>
 
-
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
 
 </LinearLayout>

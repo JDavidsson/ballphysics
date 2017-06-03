@@ -11,13 +11,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.animation.ValueAnimator;
+
+import java.math.BigInteger;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager sensorManager;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView restartButton;
     private boolean gameOn;
     private Thread T;
-    private int p;
+    private long p1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //exp
         collideCount = 0;
         gameOn = true;
-        p = 0;
+        p1 = 0;
 
         circle = (TextView) findViewById(R.id.circle);
         circle.setVisibility(View.VISIBLE);
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             private final static double c = Math.PI / (2 * g);
             private final static double bounce = 0.4; // bounce factor
 
-            private double interval = 0.002; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
+            private double interval = 0.0002; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
 
             //exp
             private boolean collision = false;
@@ -147,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     b *= 0.95;
 
                 } while (ballParkWidth == 0 || ballParkHeight == 0 || a == 0 || b == 0);
+
 
                 while (gameOn) {
 
@@ -205,8 +207,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             ball1.setY(Double.valueOf(b1Y).floatValue());
 
                             //experiments
-                            p++;
-                            points.setText(String.valueOf(p));
+                            p1++;
+                            points.setText(String.valueOf(p1));
                             if (collision) {
                                 collideCount++;
                                 collide();
@@ -226,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         circle.setVisibility(View.GONE);
                         ball.setVisibility(View.GONE);
                         restartButton.setVisibility(View.VISIBLE);
-                        livesLeft.setVisibility(View.INVISIBLE);
+                        livesLeft.setVisibility(View.VISIBLE);
                         ValueAnimator animation = ValueAnimator.ofFloat(0.5f,1f);
                         animation.setRepeatCount(3);
                         animation.setStartDelay(4000);
@@ -261,39 +263,43 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 });
 
+                /**
                 handler.post(new Runnable() {
-                    public void run() {
-                        Animation anim = new ScaleAnimation(
-                                1f, 0f, // Start and end values for the X axis scaling
-                                1f, 0f, // Start and end values for the Y axis scaling
-                                Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
-                                Animation.RELATIVE_TO_SELF, 0.5f); // Pivot point of Y scaling
-                        anim.setFillAfter(true); // Needed to keep the result of the animation
-                        anim.setDuration(1000);
-                        anim.setStartOffset(1000);
-                        lives.startAnimation(anim);
-                    }
-                    }
+                                 public void run() {
+                                     Animation anim = new ScaleAnimation(
+                                             1f, 0f, // Start and end values for the X axis scaling
+                                             1f, 0f, // Start and end values for the Y axis scaling
+                                             Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
+                                             Animation.RELATIVE_TO_SELF, 0.5f); // Pivot point of Y scaling
+                                     anim.setFillAfter(true); // Needed to keep the result of the animation
+                                     anim.setDuration(1000);
+                                     anim.setStartOffset(1000);
+                                     lives.startAnimation(anim);
+                                 }
+                             }
                 );
+                 */
 
                 handler.post(new Runnable() {
                                  public void run() {
                                      final float size = pointsText.getTextSize();
 
-                                     ValueAnimator animation = ValueAnimator.ofFloat(1f,1.4f);
+                                     ValueAnimator animation = ValueAnimator.ofFloat(1f,2f);
                                      animation.setDuration(1000);
                                      animation.setStartDelay(2000);
                                      final float size2 = lives.getTextSize();
+                                     final float size3 = livesLeft.getTextSize();
                                      animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                                          @Override
                                          public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                              float val = (float) valueAnimator.getAnimatedValue();
                                              float newSize = size * val;
                                              float newSize2 = size2 * (2f-val);
+                                             float newSize3 = size3 * (2f-val);
                                              pointsText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize);
                                              points.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize);
                                              lives.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize2);
-
+                                             livesLeft.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize3);
                                          }
                                      });
                                      animation.start();
