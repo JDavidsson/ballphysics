@@ -131,10 +131,30 @@
 
     </LinearLayout>
 
-    <ListView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="5dp"
+        android:orientation="vertical">
 
+        <TextView
+            android:textColor="@color/livesLeft"
+            android:id="@+id/highScoreTitle"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="High score"
+            />
+
+          <TextView
+        android:textColor="@color/livesLeft"
+        android:id="@+id/highScore"
+        android:textSize="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="" />
+</LinearLayout>
 
 </LinearLayout>

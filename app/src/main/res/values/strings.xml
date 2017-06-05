@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">keep the ball inside the circle</string>
+    <string name="high_score">com.example.myapp.HIGH_SCORE</string> <!-- change this to something appropriate -->
+    <string name="default_highscore"></string>
 </resources>

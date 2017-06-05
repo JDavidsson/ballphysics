@@ -1,6 +1,7 @@
 package com.example.j.balltest;
-
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -16,8 +17,8 @@ import android.widget.TextView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.animation.ValueAnimator;
-
-import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -43,10 +44,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView points;
     private TextView pointsText;
     private TextView livesLeft;
+    private TextView highScoreView;
     private TextView restartButton;
     private boolean gameOn;
     private Thread T;
     private long p1;
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +62,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // 1 inch = 0.0254 m
         xPixelsPerMeter = metrics.xdpi / 0.0254;
         yPixelsPerMeter = metrics.ydpi / 0.0254;
-        // show
-        ((TextView) findViewById(R.id.ppi)).setText("ppi x: " + String.valueOf(metrics.xdpi) + "\n" + "ppi y: " + String.valueOf(metrics.ydpi));
-        ((TextView) findViewById(R.id.ppm)).setText("ppm x: " + String.valueOf(xPixelsPerMeter) + "\n" + "ppm x: " + String.valueOf(yPixelsPerMeter));
-
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         handler = new Handler();
@@ -96,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         collideCount = 0;
         gameOn = true;
         p1 = 0;
-
         circle = (TextView) findViewById(R.id.circle);
         circle.setVisibility(View.VISIBLE);
         ball = (TextView) findViewById(R.id.ball1);
@@ -108,6 +106,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         restartButton = (TextView) findViewById(R.id.restartButton);
         restartButton.setVisibility(View.GONE);
         lives.setText(String.valueOf(totalLives - collideCount));
+
+        //highscore stuff
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+
+        loadHighScore(-1);
+
+        // ---- The ball -----
 
         ballThread = new Runnable() {
 
@@ -130,11 +135,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             private final static double c = Math.PI / (2 * g);
             private final static double bounce = 0.4; // bounce factor
 
-            private double interval = 0.0002; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
+            private double interval = 0.002; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
 
             //exp
             private boolean collision = false;
-            private boolean flag = true;
 
             @Override
             public void run() {
@@ -148,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     b *= 0.95;
 
                 } while (ballParkWidth == 0 || ballParkHeight == 0 || a == 0 || b == 0);
-
 
                 while (gameOn) {
 
@@ -207,21 +210,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             ball1.setY(Double.valueOf(b1Y).floatValue());
 
                             //experiments
-                            p1++;
-                            points.setText(String.valueOf(p1));
+                            if(gameOn) {
+                                points.setText(String.valueOf(p1));
+                            }
                             if (collision) {
                                 collideCount++;
                                 collide();
                                 collision = false;
                                 if (collideCount == totalLives) {
                                     gameOn = false;
+                                    // high score check
+                                    loadHighScore(p1);
                                 }
                             }
                         }
                     });
+
+                    p1++;
                 }
 
-                //game over
+                // ------- GAME OVER --------
+
+                // lots of animations
 
                 handler.post(new Runnable() {
                     public void run() {
@@ -242,9 +252,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             }});
 
                         animation.start();
-                        }
-                    });
-
+                    }
+                });
                 handler.post(new Runnable() {
                     public void run() {
                         ValueAnimator animation = ValueAnimator.ofFloat(0f,1f);
@@ -262,28 +271,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         animation.start();
                     }
                 });
-
-                /**
-                handler.post(new Runnable() {
-                                 public void run() {
-                                     Animation anim = new ScaleAnimation(
-                                             1f, 0f, // Start and end values for the X axis scaling
-                                             1f, 0f, // Start and end values for the Y axis scaling
-                                             Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
-                                             Animation.RELATIVE_TO_SELF, 0.5f); // Pivot point of Y scaling
-                                     anim.setFillAfter(true); // Needed to keep the result of the animation
-                                     anim.setDuration(1000);
-                                     anim.setStartOffset(1000);
-                                     lives.startAnimation(anim);
-                                 }
-                             }
-                );
-                 */
-
                 handler.post(new Runnable() {
                                  public void run() {
                                      final float size = pointsText.getTextSize();
-
                                      ValueAnimator animation = ValueAnimator.ofFloat(1f,2f);
                                      animation.setDuration(1000);
                                      animation.setStartDelay(2000);
@@ -306,11 +296,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                  }
                              }
                 );
-
-
-
                 acc[0] = acc[1] = acc[2] = 0;
-
             }
         };
 
@@ -318,11 +304,47 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         T.start();
     }
 
+    private void loadHighScore(long p) {
+
+        highScoreView = (TextView) findViewById(R.id.highScore);
+        String[] s = sharedPref.getString(getString(R.string.high_score), "0").split(":");
+        highScoreView.setText("");
+
+        Long[] highScore;
+
+        if (p == -1) {
+            highScore = new Long[s.length];
+        } else {
+            highScore = new Long[s.length + 1];
+            highScore[s.length] = p;
+        }
+        for (int i = 0; i < s.length; i++) {
+            highScore[i] = Long.parseLong(s[i]);
+        }
+        //sort and set highscore
+        Arrays.sort(highScore, Collections.reverseOrder());
+        int i = 0;
+        while (i < highScore.length && i < 3) {
+            highScoreView.append(String.valueOf(i + 1) + " : " + highScore[i] + "\n");
+            i++;
+        }
+
+        StringBuilder output = new StringBuilder();
+        //format for saving
+        for (int j = 0; j < highScore.length; j++) {
+            output.append(String.valueOf(highScore[j]) + ":");
+        }
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.high_score), output.toString());
+        editor.commit();
+    }
+
     public void restart(View view) {
         Intent intent = getIntent();
         finish();
         startActivity(intent);
     }
+    
     private void collide() {
 
         GradientDrawable shape1 = (GradientDrawable) circle.getBackground();
@@ -352,6 +374,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         restartButton.setTextColor(livesColor | 0xFF000088);
         points.setTextColor(livesColor | 0xFF000088);
         pointsText.setTextColor(livesColor | 0xFF000088);
+        highScoreView.setTextColor(livesColor | 0xFF000088);
+        ((TextView) findViewById(R.id.highScoreTitle)).setTextColor(livesColor | 0xFF000088);
 
     }
 
