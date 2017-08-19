@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double ballParkWidth;
     private double ballParkHeight;
     private int collideCount;
-    private static final int totalLives = 10;
+    private static final int totalLives = 3;
     private Runnable ballThread;
     private float[] acc = new float[3];
 
@@ -131,11 +131,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             private double a;
             private double b;
 
-            private final static double g = 9.807; // 9.807
-            private final static double c = Math.PI / (2 * g);
+            private double g = 9.807; // 9.807
+            private final double c = Math.PI / (2 * g);
             private final static double bounce = 0.4; // bounce factor
 
-            private double interval = 0.002; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
+            private double interval = 0.0002; // Adjust to make slower/faster. Should in "reality" be the same as the length (time) of every iteration
 
             //exp
             private boolean collision = false;
@@ -227,6 +227,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     });
 
                     p1++;
+
+
+                    // TODO https://en.wikipedia.org/wiki/Surface_gravity
+                    // increase gravity
+                    if ((p1 % 1000) == 0) {
+                        g *= 1.1;
+                    }
+
                 }
 
                 // ------- GAME OVER --------
@@ -344,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         finish();
         startActivity(intent);
     }
-    
+
     private void collide() {
 
         GradientDrawable shape1 = (GradientDrawable) circle.getBackground();
