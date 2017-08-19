@@ -1,4 +1,4 @@
-package com.example.j.balltest;
+package com.johandavidsson.keeptheball.balltest;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

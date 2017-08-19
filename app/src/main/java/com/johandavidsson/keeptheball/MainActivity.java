@@ -1,4 +1,4 @@
-package com.example.j.balltest;
+package com.johandavidsson.keeptheball;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +17,9 @@ import android.widget.TextView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.animation.ValueAnimator;
+
+import com.johandavidsson.keeptheball.balltest.R;
+
 import java.util.Arrays;
 import java.util.Collections;
 

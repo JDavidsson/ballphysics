@@ -1,4 +1,4 @@
-package com.example.j.balltest;
+package com.johandavidsson.keeptheball.balltest;
 
 import org.junit.Test;
 
